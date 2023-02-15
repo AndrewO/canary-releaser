@@ -10,9 +10,7 @@ export type Stage = { command: 'release', selector: any} |
   {command: 'delay', seconds: number} |
   {command: 'waitForApproval'}
 
-
 // Client
-
 function usage() {
   console.log(`release <rollback-revision> <next-revision> [[r:<selector] [d:<seconds>] [w]]`)
   process.exit(2)
@@ -24,17 +22,6 @@ const nextRevision = argv._.shift()
 if(!!argv.h || !rollbackRevision || !nextRevision) {
   usage()
 } else {
-  // Install rollback handler
-  // [
-  //   'SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGTRAP', 'SIGABRT',
-  //   'SIGBUS', 'SIGFPE', 'SIGSEGV', 'SIGUSR1', 'SIGUSR2', 'SIGTERM',
-  //   'uncaughtException', 'unhandledRejection'
-  // ].forEach(signal => process.on(signal, async () => {
-  //   // There are ways this could be made more robust, but let's move along to the next example...
-  //   await rollback(rollbackRevision)
-  //   process.exit(1)
-  // }))
-
   // build stage commands
   let stages: Array<Stage> = []
   for(const s of argv._) {
@@ -55,10 +42,8 @@ if(!!argv.h || !rollbackRevision || !nextRevision) {
 
   // Call release
   const handle = await client.workflow.start(release, {
-    // type inference works! args: [name: string]
     args: [rollbackRevision, nextRevision, stages],
     taskQueue: 'canary-releaser',
-    // in practice, use a meaningful business ID, like customerId or transactionId
     workflowId: `release-${nextRevision}-${new Date().toISOString()}`,
   });
   console.log(`Started workflow ${handle.workflowId}`);

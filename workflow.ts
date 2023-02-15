@@ -1,4 +1,4 @@
-import { proxyActivities, sleep, setHandler, condition, defineSignal, SignalDefinition, CancellationScope, Trigger, ApplicationFailure, proxySinks, LoggerSinks } from '@temporalio/workflow';
+import { proxyActivities, sleep, setHandler, condition, defineSignal, SignalDefinition, CancellationScope, Trigger, ApplicationFailure, proxySinks, LoggerSinks, defineQuery } from '@temporalio/workflow';
 import type * as activities from './activities.js';
 import type { Revision, Stage } from './index.js'
 
@@ -10,13 +10,16 @@ const { defaultWorkerLogger: console } = proxySinks<LoggerSinks>();
 
 
 // Release workflow
+let stage: Stage
+const stageQuery = defineQuery<Stage>('stage')
 export async function release(rollbackRevision: Revision, nextRevision: Revision, stages: Array<Stage>) {
-  await 
-  await deployRevision(nextRevision)
+  setHandler(stageQuery, () => stage)
+  await deployRevision(rollbackRevision) // Ensure that this revision is present
+  await deployRevision(nextRevision) // Add the new one
 
   console.debug('stages', { stages })
   try {
-    for(const stage of stages) {
+    for(stage of stages) {
       if (stage.command === 'release') {
         await applyRelease(nextRevision, stage.selector)
       } else if (stage.command === 'delay') {
