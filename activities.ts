@@ -1,5 +1,3 @@
-import { question } from 'zx' // ZX has a lot of wonderful conveniences for writing shell scripts with Node
-
 import type { Revision } from './index.js'
 
 // Activities
@@ -17,6 +15,7 @@ export async function applyRelease(revision: Revision, selector?: any) {
 
 export async function commitRelease(revision: Revision) {
   console.log(`Committing release ${revision}`)
+  // Remove any selectors and just route all traffic to the specified revision
   return Promise.resolve()
 }
 
